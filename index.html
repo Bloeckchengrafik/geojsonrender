@@ -43,6 +43,24 @@
                 },
             ).addTo(map);
 
+            function render(json) {
+                var geoJsonLayer = L.geoJSON(json, {
+                    onEachFeature: function (feature, layer) {
+                        if (feature.properties && feature.properties.name) {
+                            layer.bindTooltip(feature.properties.name, {
+                                permanent: true,
+                                direction: "center",
+                                className: "my-label",
+                            });
+                        }
+                    },
+                }).addTo(map);
+
+                map.fitBounds(geoJsonLayer.getBounds(), {
+                    padding: [50, 50],
+                });
+            }
+
             const hash = window.location.hash;
             if (hash) {
                 // Example hash format: #data=data:application/json,ENCODED_JSON_STRING
@@ -52,27 +70,23 @@
                     const decodedData = decodeURIComponent(encodedData);
                     const geojsonData = JSON.parse(decodedData);
                     console.log("Successfully loaded data from URL hash.");
-
-                    var geoJsonLayer = L.geoJSON(geojsonData, {
-                        onEachFeature: function (feature, layer) {
-                            if (feature.properties && feature.properties.name) {
-                                layer.bindTooltip(feature.properties.name, {
-                                    permanent: true,
-                                    direction: "center",
-                                    className: "my-label",
-                                });
-                            }
-                        },
-                    }).addTo(map);
-
-                    map.fitBounds(geoJsonLayer.getBounds(), {
-                        padding: [50, 50],
-                    });
+                    render(geojsonData);
                 } else {
                     throw new Error("URL hash is not in the correct format.");
                 }
             } else {
-                alert("No URL hash found, attempting to load from file.");
+                let json = {
+                    type: "Feature",
+                    geometry: {
+                        type: "Point",
+                        coordinates: [8.64135, 49.86623],
+                    },
+                    properties: {
+                        name: "Infotreff Fachbereich Informatik",
+                    },
+                };
+
+                render(json);
             }
         </script>
     </body>
